@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Attendance</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_admin">AdminActivity</string>
+    <string name="title_activity_faculty">FacultyActivity</string>
+    <string name="title_activity_show_courses">ShowCourses</string>
+    <string name="title_activity_add_att">AddAttActivity</string>
+    <string name="title_activity_show_att">ShowAttActivity</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_course_details">CourseDetails</string>
+    <string name="inform">Select present to mark for presentees</string>
+    <string name="informagain">Select absent to mark for absenetees</string>
+</resources>
