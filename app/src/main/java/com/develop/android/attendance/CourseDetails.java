@@ -1,5 +1,6 @@
 package com.develop.android.attendance;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -46,7 +47,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CourseDetails extends AppCompatActivity {
+    final Context context = this;
     String presentCourse, presentyear;
+    int rowval, colval;
     AlertDialog.Builder builder;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mCoursesDatabaseReference, mRollDatabaseReference, mUsersDatabaseReference, mStatusDatabaseReference;
@@ -159,12 +162,36 @@ public class CourseDetails extends AppCompatActivity {
         addexcel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
                 intent.putExtra("name", value);
                 presentCourse = value;
                 presentyear = yearval;
-                startActivityForResult(intent, 2);
+                LayoutInflater li = LayoutInflater.from(CourseDetails.this);
+                View promptsView = li.inflate(R.layout.promptexcel, null);
+                android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(CourseDetails.this);
+                alertDialogBuilder.setView(promptsView);
+                final EditText Row = (EditText) promptsView.findViewById(R.id.editText);
+                final EditText column = (EditText) promptsView.findViewById(R.id.editText2);
+                alertDialogBuilder.setCancelable(false)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                rowval = Integer.parseInt(Row.getText().toString());
+                                colval = Integer.parseInt(column.getText().toString());
+                                startActivityForResult(intent, 2);
+                            }
+                        })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+
+                                        dialog.cancel();
+                                    }
+                                });
+                android.app.AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
     }
@@ -248,32 +275,6 @@ public class CourseDetails extends AppCompatActivity {
                     if (resultCode == RESULT_OK) {
                         Uri uri = data.getData();
                         String extension = examine(uri);
-//                        LayoutInflater li = LayoutInflater.from(CourseDetails.this);
-//                        View promptsView = li.inflate(R.layout.promptexcel, null);
-//                        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(CourseDetails.this);
-//                        alertDialogBuilder.setView(promptsView);
-//                        final EditText Row = (EditText) promptsView.findViewById(R.id.editText);
-//                        final EditText column = (EditText) promptsView.findViewById(R.id.editText2);
-//                        int x, y;
-//                        alertDialogBuilder.setCancelable(false)
-//                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialog, int which) {
-//                                        final String rownum = Row.getText().toString();
-//                                        final String colnum = column.getText().toString();
-//                                        Log.d("hey", rownum + "   " + colnum);
-//                                    }
-//                                })
-//                                .setNegativeButton("Cancel",
-//                                        new DialogInterface.OnClickListener() {
-//                                            public void onClick(DialogInterface dialog, int id) {
-//
-//
-//                                                dialog.cancel();
-//                                            }
-//                                        });
-//                        android.app.AlertDialog alertDialog = alertDialogBuilder.create();
-//                        alertDialog.show();
                         if (extension.equals(xls)) {
                             try {
                                 InputStream is = getContentResolver().openInputStream(data.getData());
@@ -290,7 +291,7 @@ public class CourseDetails extends AppCompatActivity {
 
                                     while (cellIterator.hasNext()) {
                                         Cell cell = cellIterator.next();
-                                        if ((cell.getColumnIndex() == 1) && (cell.getRowIndex() > 0)) {
+                                        if ((cell.getColumnIndex() == colval-1) && (cell.getRowIndex() >= rowval-1)) {
                                             switch (cell.getCellType()) {
                                                 case Cell.CELL_TYPE_NUMERIC:
                                                     //Toast.makeText(getApplicationContext(),cell.getNumericCellValue()+"",Toast.LENGTH_LONG).show();
@@ -331,7 +332,7 @@ public class CourseDetails extends AppCompatActivity {
 
                                     while (cellIterator.hasNext()) {
                                         Cell cell = cellIterator.next();
-                                        if ((cell.getColumnIndex() == 1) && (cell.getRowIndex() > 0)) {
+                                        if ((cell.getColumnIndex() == colval-1) && (cell.getRowIndex() >=rowval-1)) {
                                             switch (cell.getCellType()) {
                                                 case Cell.CELL_TYPE_NUMERIC:
                                                     //Toast.makeText(getApplicationContext(),cell.getNumericCellValue()+"",Toast.LENGTH_LONG).show();

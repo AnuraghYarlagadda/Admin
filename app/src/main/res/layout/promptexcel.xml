@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/addCourseText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add ROW and COLUMN Numbers from your Excel"
         android:layout_centerHorizontal="true"
+        android:text="Enter Row and Column Numbers from your Excel"
         android:textAlignment="center"
-        android:textSize="15sp" />
+        android:textSize="13sp" />
 
     <EditText
         android:id="@+id/editText"
