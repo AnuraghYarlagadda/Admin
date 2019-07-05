@@ -24,7 +24,7 @@ import java.util.List;
 public class CourseAdapter extends ArrayAdapter<Courses> {
     private Context mContext;
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mCoursesDatabaseReference, mRollDatabaseReference, mUsersDatabaseReference, mStatusDatabaseReference;
+    private DatabaseReference mCoursesDatabaseReference, mRollDatabaseReference, mStatusDatabaseReference;
 
     public CourseAdapter(Context context, int resource, List<Courses> objects) {
         super(context, resource, objects);

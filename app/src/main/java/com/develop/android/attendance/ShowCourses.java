@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -46,14 +47,12 @@ import static java.lang.Thread.sleep;
 public class ShowCourses extends AppCompatActivity {
 
     private TextView mTextMessage;
-    private static List<RollNumbers> totalRoll =new ArrayList<>();
-    String presentCourse,presentyear;
-    Button showfullatt,status;
+    Button showfullatt;
     private CourseAdapter mCourseAdapter;
     private ListView mCourseListView;
-    private ChildEventListener mChildEventListener,mRollChildEventListener;
+    private ChildEventListener mChildEventListener;
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mCoursesDatabaseReference,mRollDatabaseReference,mUsersDatabaseReference,mStatusDatabaseReference;
+    private DatabaseReference mCoursesDatabaseReference,mRollDatabaseReference,mStatusDatabaseReference;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -88,7 +87,6 @@ public class ShowCourses extends AppCompatActivity {
         mTextMessage = (TextView) findViewById(R.id.message);
         mCourseListView = (ListView) findViewById(R.id.list);
         final List<Courses> courses = new ArrayList<>();
-        final List<RollNumbers> fullatt=new ArrayList<RollNumbers>();
         mCourseAdapter = new CourseAdapter(this, R.layout.adminlist_item, courses);
         mCourseListView.setAdapter(mCourseAdapter);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -102,9 +100,32 @@ public class ShowCourses extends AppCompatActivity {
             showfullatt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(ShowCourses.this, ShowFullActivity.class);
-                    intent.putExtra("CourseYear", courseYear);
-                    ShowCourses.this.startActivity(intent);
+                    LayoutInflater li = LayoutInflater.from(ShowCourses.this);
+                    View promptsView = li.inflate(R.layout.buttonprompt, null);
+                    android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(ShowCourses.this);
+                    alertDialogBuilder.setView(promptsView);
+                    final Button present=(Button)promptsView.findViewById(R.id.present);
+                    final Button absent=(Button)promptsView.findViewById(R.id.absent);
+                    android.app.AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    present.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(ShowCourses.this, ShowFullActivity.class);
+                            intent.putExtra("Year", courseYear);
+                            intent.putExtra("what","present");
+                            ShowCourses.this.startActivity(intent);
+                        }
+                    });
+                    absent.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(ShowCourses.this, ShowFullActivity.class);
+                            intent.putExtra("Year", courseYear);
+                            intent.putExtra("what","absent");
+                            ShowCourses.this.startActivity(intent);
+                        }
+                    });
                 }
             });
         }
@@ -177,20 +198,7 @@ public class ShowCourses extends AppCompatActivity {
         Toast.makeText(this, "course"+x+"Deleted", Toast.LENGTH_SHORT).show();
 
     }
-    public void addExcel(final Courses thisCourse){
-        Intent intent=new Intent(Intent.ACTION_GET_CONTENT);
-        //  intent.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        intent.setType("*/*");
-        intent.putExtra("name",thisCourse.courseName);
-        presentCourse=thisCourse.courseName;
-        presentyear=thisCourse.year;
-        Toast.makeText(this, "before!"+thisCourse.courseName, Toast.LENGTH_LONG).show();
-        Log.d("chek", "addexcel in");
-        startActivityForResult(intent, 2);
-        Toast.makeText(this, "before!"+thisCourse.courseName, Toast.LENGTH_LONG).show();
-        // Toast.makeText(this, "After in!", Toast.LENGTH_LONG).show();
-        //}
-    }
+
     public int presentstatus(final Courses thisCourse){
         Query query=mStatusDatabaseReference.child(thisCourse.year).child(thisCourse.courseName);
         final int[] flag = {0};
@@ -212,7 +220,6 @@ public class ShowCourses extends AppCompatActivity {
 
             }
         });
-        Log.d("staite",flag[0]+"");
         return flag[0];
     }
 public  void gocourse(final Courses thisCourse,String status){
@@ -221,115 +228,9 @@ public  void gocourse(final Courses thisCourse,String status){
         intent.putExtra("Year",thisCourse.year);
         intent.putExtra("faculty",thisCourse.courseFaculty);
         intent.putExtra("emails",thisCourse.emails);
+        intent.putExtra("mobile",thisCourse.mobileNumber);
+        intent.putExtra("venue",thisCourse.venue);
         intent.putExtra("status",status);
         ShowCourses.this.startActivity(intent);
-    }
-    public void showAtt(final Courses thisCourse){
-        Query query=FirebaseDatabase.getInstance().getReference().child("Attendance").child(thisCourse.year).child(thisCourse.courseName);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Intent intent=new Intent(ShowCourses.this,ShowAttActivity.class);
-                    intent.putExtra("CourseName",thisCourse.courseName);
-                    intent.putExtra("Year",thisCourse.year);
-                    ShowCourses.this.startActivity(intent);
-                } else {
-                    Log.e("hhh", "N");
-                    Toast.makeText(ShowCourses.this, "Attendance Not Added", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-    }
-    public void permitaddatt(final Courses thisCourse){
-        final String courseName=thisCourse.courseName;
-        final String Year=thisCourse.year;
-        Query query=FirebaseDatabase.getInstance().getReference().child("Roll").child(Year).child(courseName);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Intent intent = new Intent(ShowCourses.this, AddAttActivity.class);
-                    intent.putExtra("CourseName", courseName);
-                    intent.putExtra("Year",Year);
-                    ShowCourses.this.startActivity(intent);
-                    Log.e("hhhh", "Y" + "");
-                } else {
-                    Log.e("hhh", "N");
-                    Toast.makeText(ShowCourses.this, "Please Add Excel", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        List<RollNumbers> roll =new ArrayList<>();
-        // HashMap<String, String> rolls = new HashMap()<String,String>;
-        if (data == null)
-            return;
-        String temp,Name = null;
-        switch (requestCode) {
-            case 2:
-                try {
-                    if (resultCode == RESULT_OK) {
-                        try {
-                            Log.d("chek", "addexcel in try");
-                            Toast.makeText(getApplicationContext(),"Ushh",Toast.LENGTH_LONG).show();
-                            InputStream is = getContentResolver().openInputStream(data.getData());
-                            XSSFWorkbook workbook = new XSSFWorkbook(is);
-                            XSSFSheet sheet = workbook.getSheetAt(0);
-                            //Toast.makeText(getApplicationContext(),sheet.getLastRowNum()+"",Toast.LENGTH_LONG).show();
-                            Bundle extras=data.getExtras();
-                            if(extras!=null)
-                                Name=extras.getString("name");
-                            //Toast.makeText(getApplicationContext(),"is"+Name,Toast.LENGTH_LONG).show();
-                            Iterator<Row> rowIterator = sheet.iterator();
-                            while (rowIterator.hasNext()) {
-                                Row row = rowIterator.next();
-                                // For each row, iterate through all the columns
-                                Iterator<Cell> cellIterator = row.cellIterator();
-
-                                while (cellIterator.hasNext()) {
-                                    Cell cell = cellIterator.next();
-                                    if((cell.getColumnIndex()==1)&&(cell.getRowIndex()>0)){
-                                        switch (cell.getCellType()) {
-                                            case Cell.CELL_TYPE_NUMERIC:
-                                                //Toast.makeText(getApplicationContext(),cell.getNumericCellValue()+"",Toast.LENGTH_LONG).show();
-                                                break;
-                                            case Cell.CELL_TYPE_STRING:
-                                                temp=cell.getStringCellValue();
-                                                RollNumbers rollnumbers= new RollNumbers(temp);
-                                                roll.add(new RollNumbers(temp));
-                                                // Toast.makeText(getApplicationContext(),cell.getStringCellValue()+"",Toast.LENGTH_LONG).show();
-                                                break;
-                                        }
-                                    }
-
-                                }
-                                mRollDatabaseReference.child(presentyear).child(presentCourse).setValue(roll);
-
-                            }
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-        }
     }
 }

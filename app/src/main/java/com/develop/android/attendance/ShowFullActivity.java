@@ -2,28 +2,29 @@ package com.develop.android.attendance;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.DisplayMetrics;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,169 +36,338 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static java.lang.Thread.sleep;
+
 public class ShowFullActivity extends AppCompatActivity {
-    private static List<RollNumbers> totalRoll = new ArrayList<>();
-    private final Set<String> fullatt = new HashSet<>();
-    private ChildEventListener mAttendanceChildEventListener;
-    private String year;
+    private static List<RollNumbers> roll = new ArrayList<>();
+    TextView text;
+    private Set<String> presentlist = new HashSet<>();
+    private Set<String> absentlist = new HashSet<>();
+    private String  yearval, what;
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mCoursesDatabaseReference, mAttendanceDatabaseReference;
+    private DatabaseReference mAttendanceDatabaseReference, mAbsentDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_full);
-        Intent intent = getIntent();
-        final String courseYear = intent.getStringExtra("CourseYear");
-        year = courseYear;
-        totalRoll.clear();
-        fullatt.clear();
-        Button downloadpdf = (Button) findViewById(R.id.downloadpdf);
-        final Button clickpdf = (Button) findViewById(R.id.clickpdf);
-        final LinearLayout ll1 = (LinearLayout) findViewById(R.id.my_layout1);
+        setContentView(R.layout.content_show_att);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mAttendanceDatabaseReference = mFirebaseDatabase.getReference().child("Attendance");
-        mAttendanceDatabaseReference.child(courseYear).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    GenericTypeIndicator<List<RollNumbers>> t = new GenericTypeIndicator<List<RollNumbers>>() {
-                    };
-                    totalRoll = snapshot.getValue(t);
-                    final LinearLayout ll1 = (LinearLayout) findViewById(R.id.my_layout1);
-                    for (int i = 0; i < totalRoll.size(); i++)
-                        fullatt.add(totalRoll.get(i).getRollnum());
+        mAbsentDatabaseReference = mFirebaseDatabase.getReference().child("AbsentAttendance");
+        final LinearLayout ll1 = (LinearLayout) findViewById(R.id.my_layout1);
+        Button downloadpdf = (Button) findViewById(R.id.downloadpdf);
+        final Button clickpdf = (Button) findViewById(R.id.clickpdf);
+        text = (TextView) findViewById(R.id.status);
+        Intent intent = getIntent();
+        yearval = intent.getStringExtra("Year");
+        what = intent.getStringExtra("what");
+        text.setText("Year_" + yearval + "_" + what);
+        if (what.equals("present")) {
+            roll.clear();
+            mAttendanceDatabaseReference.child(yearval).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        GenericTypeIndicator<List<RollNumbers>> t = new GenericTypeIndicator<List<RollNumbers>>() {
+                        };
+                        roll = snapshot.getValue(t);
+                        final LinearLayout ll1 = (LinearLayout) findViewById(R.id.my_layout1);
+                        for (int i = 0; i < roll.size(); i++)
+                            presentlist.add(roll.get(i).getRollnum());
+
+                    }
+                    Set<String> tree_Set = new TreeSet<String>(presentlist);
+                    List<String> stringsList = new ArrayList<>(tree_Set);
+                    for (int i = 0; i < stringsList.size(); i++) {
+                        TextView cb = new TextView(ShowFullActivity.this);
+                        cb.setText(stringsList.get(i));
+                        cb.setId(i);
+                        ll1.addView(cb);
+
+                    }
+                    TextView cb = new TextView(ShowFullActivity.this);
+                    cb.setText("Year_"+yearval+"present:"+stringsList.size());
+                    cb.setId(stringsList.size());
+                    ll1.addView(cb);
 
                 }
-                getData(ll1);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        } else {
+            roll.clear();
+            mAbsentDatabaseReference.child(yearval).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        GenericTypeIndicator<List<RollNumbers>> t = new GenericTypeIndicator<List<RollNumbers>>() {
+                        };
+                        roll = snapshot.getValue(t);
+                        final LinearLayout ll1 = (LinearLayout) findViewById(R.id.my_layout1);
+                        for (int i = 0; i < roll.size(); i++)
+                            absentlist.add(roll.get(i).getRollnum());
+
+                    }
+                    Set<String> tree_Set = new TreeSet<String>(absentlist);
+                    List<String> stringsList = new ArrayList<>(tree_Set);
+                    for (int i = 0; i < stringsList.size(); i++) {
+                        TextView cb = new TextView(ShowFullActivity.this);
+                        cb.setText(stringsList.get(i));
+                        cb.setId(i);
+                        ll1.addView(cb);
+
+                    }
+                    TextView cb = new TextView(ShowFullActivity.this);
+                    cb.setText("Year_"+yearval+"Absent:"+stringsList.size());
+                    cb.setId(stringsList.size());
+                    ll1.addView(cb);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
         downloadpdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int flag=createPdf();
-                if (flag==0)
-                {
-                    clickpdf.setClickable(false);
+                requestAppPermissions();
+                if (hasReadPermissions() && hasWritePermissions()) {
+                    createPdf(what);
                 }
             }
         });
         clickpdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                File pdfFile = new File(Environment.getExternalStorageDirectory() + "/Attendance/" + "Year_"+yearval + "_" + what + ".pdf");
+                if (pdfFile.exists()) {
+                    Uri excelPath;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-                File pdfFile = new File(Environment.getExternalStorageDirectory() + "/Attendance/" + "Year" + year + ".pdf");
-                Uri excelPath;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                    excelPath = FileProvider.getUriForFile(ShowFullActivity.this, "com.develop.android.attendance", pdfFile);
+                        excelPath = FileProvider.getUriForFile(ShowFullActivity.this, "com.develop.android.attendance", pdfFile);
+                    } else {
+                        excelPath = Uri.fromFile(pdfFile);
+                    }
+                    Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
+                    pdfIntent.setDataAndType(excelPath, "application/pdf");
+                    pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    pdfIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    try {
+                        startActivity(pdfIntent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(ShowFullActivity.this, "No Application available to view PDF", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    excelPath = Uri.fromFile(pdfFile);
+                    Toast.makeText(ShowFullActivity.this, "File not found!", Toast.LENGTH_SHORT).show();
                 }
-                Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
-                pdfIntent.setDataAndType(excelPath, "application/pdf");
-                pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                pdfIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                try {
-                    startActivity(pdfIntent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(ShowFullActivity.this, "No Application available to view PDF", Toast.LENGTH_SHORT).show();
-                }
+
             }
         });
     }
 
-    public void getData(LinearLayout ll) {
-
-        Set<String> tree_Set = new TreeSet<String>(fullatt);
-        List<String> stringsList = new ArrayList<>(tree_Set);
-        for (int i = 0; i < stringsList.size(); i++) {
-            TextView cb = new TextView(this);
-            cb.setText(stringsList.get(i));
-            cb.setId(i);
-            ll.addView(cb);
-
-        }
-    }
-
-    private int createPdf() {
+    private void createPdf(String what) {
         // create a new document
-        PdfDocument document = new PdfDocument();
+        if (what.equals("present")) {
+            Set<String> tree_Set = new TreeSet<String>(presentlist);
+            List<String> stringsList = new ArrayList<>(tree_Set);
+            PdfDocument document = new PdfDocument();
 
-        // crate a page description
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(400, 1000, 1).create();
+            // crate a page description
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
+            DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
+            String date = df.format(Calendar.getInstance().getTime());
+            // start a page
+            PdfDocument.Page page = document.startPage(pageInfo);
+            Canvas canvas = page.getCanvas();
+            Paint paint = new Paint();
+            Drawable d =  ResourcesCompat.getDrawable(getResources(), R.drawable.pdfimage, null);
+            d.setBounds(0, 0, 595, 190);
+            d.draw(canvas);
+            paint.setTextSize(12);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            paint.setColor(Color.BLACK);
+            canvas.drawText( date,20,220,paint);
+            paint.setTextSize(30);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            paint.setColor(Color.BLACK);
+            canvas.drawText("Year : "+yearval,250,220,paint);
+            paint.setTextSize(20);
+            canvas.drawText("Present List",250,250,paint);
+            paint.reset();
+            paint.setTextSize(15);
+            paint.setColor(Color.BLACK);
+            int x=100;
+            int y=300;
+            for (int i = 0; i < stringsList.size(); i++) {
+                canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                y += 20;
+                if(y>800)
+                {
+                    document.finishPage(page);
+                    pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 2).create();
+                    page = document.startPage(pageInfo);
+                    canvas=page.getCanvas();
+                    paint.setTextSize(15);
+                    paint.setColor(Color.BLACK);
+                     x = 100;
+                     y = 40;
+                     i+=1;
+                        canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                        y += 20;
 
-
-        // start a page
-        PdfDocument.Page page = document.startPage(pageInfo);
-        Canvas canvas = page.getCanvas();
-        Paint paint = new Paint();
-        paint.setTextSize(15);
-        paint.setColor(Color.BLACK);
-        Set<String> tree_Set = new TreeSet<String>(fullatt);
-        List<String> stringsList = new ArrayList<>(tree_Set);
-        int flag=0;
-        int x = 20;
-        int y = 20;
-        if(stringsList.size()!=0)
-        {
-            flag=1;
-        }
-        for (int i = 0; i < stringsList.size(); i++) {
-            if (y > 980) {
-                x += 200;
-                y = 20;
+                }
             }
-            canvas.drawText(stringsList.get(i).toString(), x, y, paint);
-            y += 20;
-        }
+            canvas.drawText("Present Count:"+stringsList.size(), x, y, paint);
 
-        document.finishPage(page);
-        if(flag==1)
-        {
+            document.finishPage(page);
             String directory_path = Environment.getExternalStorageDirectory().getPath() + "/Attendance/";
             File file = new File(directory_path);
             if (!file.exists()) {
                 file.mkdirs();
             }
-            int i = 1;
-            String targetPdf = directory_path + "Year" + year + ".pdf";
+            String targetPdf = directory_path +  "Year_"+yearval + "_" + what  + ".pdf";
             File filePath = new File(targetPdf);
             try {
-                document.writeTo(new FileOutputStream(filePath));
-                Toast.makeText(this, "Pdf File Saved", Toast.LENGTH_SHORT).show();
+                if (hasWritePermissions()) {
+                    document.writeTo(new FileOutputStream(filePath));
+                    try
+                    {
+                        sleep(1000);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                    Toast.makeText(this, "Pdf File Saved", Toast.LENGTH_SHORT).show();
+                }
+
             } catch (IOException e) {
-                Log.e("main", "error " + e.toString());
-                Toast.makeText(this, "Something wrong: " + e.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "You didn't permit storage access", Toast.LENGTH_SHORT).show();
             }
+            // close the document
+            document.close();
+        } else {
+            Set<String> tree_Set = new TreeSet<String>(absentlist);
+            List<String> stringsList = new ArrayList<>(tree_Set);
+            PdfDocument document = new PdfDocument();
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
+            DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
+            String date = df.format(Calendar.getInstance().getTime());
+            // crate a page description
+            PdfDocument.Page page = document.startPage(pageInfo);
+            Canvas canvas = page.getCanvas();
+            Paint paint = new Paint();
+            Drawable d =  ResourcesCompat.getDrawable(getResources(), R.drawable.pdfimage, null);
+            d.setBounds(0, 0, 595, 190);
+            d.draw(canvas);
+            paint.setTextSize(12);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            paint.setColor(Color.BLACK);
+            canvas.drawText( date,20,220,paint);
+            paint.setTextSize(30);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            paint.setColor(Color.BLACK);
+            canvas.drawText("Year : "+yearval,250,220,paint);
+            paint.setTextSize(20);
+            canvas.drawText("Absent List",250,250,paint);
+            paint.reset();
+            paint.setTextSize(15);
+            paint.setColor(Color.BLACK);
+            int x = 100;
+            int y = 300;
+            for (int i = 0; i < stringsList.size(); i++) {
+                canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                y += 20;
+                if(y>800)
+                {
+                    document.finishPage(page);
+                    pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 2).create();
+                    page = document.startPage(pageInfo);
+                    canvas=page.getCanvas();
+                    paint.setTextSize(15);
+                    paint.setColor(Color.BLACK);
+                    x = 100;
+                    y = 40;
+                    i+=1;
+                    canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                    y += 20;
+
+                }
+            }
+            canvas.drawText("Absent Count:"+stringsList.size(), x, y, paint);
+            document.finishPage(page);
+            String directory_path = Environment.getExternalStorageDirectory().getPath() + "/Attendance/";
+            File file = new File(directory_path);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            String targetPdf = directory_path + "Year_"+yearval + "_" + what + ".pdf";
+            File filePath = new File(targetPdf);
+            try {
+                if (hasWritePermissions()) {
+                    document.writeTo(new FileOutputStream(filePath));
+                    try
+                    {
+                        sleep(1000);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                    Toast.makeText(this, "Pdf File Saved", Toast.LENGTH_SHORT).show();
+                }
+
+            } catch (IOException e) {
+                Toast.makeText(this, "You didn't permit storage access", Toast.LENGTH_SHORT).show();
+            }
+            // close the document
+            document.close();
         }
-        else
-        {
-            Toast.makeText(this,"No records to Download",Toast.LENGTH_SHORT).show();
-            return 0;
+        return;
+    }
+
+    private void requestAppPermissions() {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return;
         }
 
-        // close the document
-        document.close();
-        return 1;
+        if (hasReadPermissions() && hasWritePermissions()) {
+            return;
+        }
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 112); // your request code
+    }
+
+    private boolean hasReadPermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private boolean hasWritePermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
     }
 }

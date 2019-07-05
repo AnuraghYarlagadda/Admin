@@ -24,7 +24,6 @@ public class Main2Activity extends AppCompatActivity {
     TextView name, email, phno;
     private FirebaseDatabase mFirebaseDatabase;
     private FirebaseAuth mFirebaseAuth;
-    private DatabaseReference mCoursesDatabaseReference, mRollDatabaseReference, mUsersDatabaseReference, mStatusDatabaseReference;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {

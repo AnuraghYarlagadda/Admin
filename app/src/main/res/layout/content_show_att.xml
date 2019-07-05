@@ -1,31 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:padding="10dp"
+    android:padding="5dp"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".ShowAttActivity"
     tools:showIn="@layout/activity_show_att">
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="15sp"
-        android:textColor="@color/white"
-        android:background="@color/design_default_color_primary_dark"
-        android:text="Last Updated on"
-        android:id="@+id/status"/>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/status">
+        android:padding="5dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:background="@color/design_default_color_primary_dark"
+            android:text="Last Updated on"
+            android:id="@+id/status"/>
         <LinearLayout
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_below="@id/status"
             android:orientation="vertical"
+            android:layout_margin="15dp"
             android:id="@+id/my_layout1">
         </LinearLayout>
-    </ScrollView>
-</RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/my_layout1"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom">
+            <Button
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:id="@+id/downloadpdf"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:text="Download pdf"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:backgroundTint="@android:color/holo_orange_dark"
+                android:id="@+id/clickpdf"
+                android:text="view as Pdf"/>
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="Enter Row and Column Numbers from your Excel"
+        android:text="Fill the following details from your Excel"
         android:textAlignment="center"
         android:textSize="13sp" />
 
@@ -25,6 +25,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editText"
-        android:hint="Column Number" />
+        android:hint="Student Roll Column Number" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText2"
+        android:id="@+id/editText3"
+        android:hint="Student Name Column Number"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText3"
+        android:id="@+id/editText4"
+        android:hint="Sheet Number"/>
 
 </RelativeLayout>

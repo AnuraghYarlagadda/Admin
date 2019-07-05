@@ -29,7 +29,6 @@ import java.util.List;
 public class AdminActivity extends AppCompatActivity {
     final Context context = this;
     Button addCourse;
-    Spinner year;
     private TextView mTextMessage;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mCoursesDatabaseReference, mRollDatabaseReference, mUsersDatabaseReference, mStatusDatabaseReference;
@@ -84,9 +83,10 @@ public class AdminActivity extends AppCompatActivity {
                 alertDialogBuilder.setView(promptsView);
                 final EditText coursename = (EditText) promptsView.findViewById(R.id.editText);
                 final EditText facultyname = (EditText) promptsView.findViewById(R.id.editText2);
-                final EditText year = (EditText) promptsView.findViewById(R.id.editText3);
-                final EditText emails = (EditText) promptsView.findViewById(R.id.editText4);
-
+                final EditText mobileNumber = (EditText) promptsView.findViewById(R.id.editText3);
+                final EditText venue = (EditText) promptsView.findViewById(R.id.editText4);
+                final EditText year = (EditText) promptsView.findViewById(R.id.editText5);
+                final EditText emails = (EditText) promptsView.findViewById(R.id.editText6);
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("OK",
@@ -97,10 +97,8 @@ public class AdminActivity extends AppCompatActivity {
                                         final ArrayList<String> emailslist = new ArrayList<String>(n);
                                         for (int i = 0; i < n; i++) {
                                             emailslist.add(emailsstrings[i]);
-                                            UserDetails userDetails = new UserDetails(year.getText().toString(), coursename.getText().toString());
-                                            mUsersDatabaseReference.child(encodeUserEmail(emailsstrings[i])).setValue(userDetails);
                                         }
-                                        Courses course = new Courses(coursename.getText().toString(), facultyname.getText().toString(), emailslist, year.getText().toString());
+                                        Courses course = new Courses(coursename.getText().toString(), facultyname.getText().toString(), emailslist, year.getText().toString(),mobileNumber.getText().toString(),venue.getText().toString());
                                         mCoursesDatabaseReference.child(year.getText().toString()).child(coursename.getText().toString()).setValue(course);
                                         mCoursesDatabaseReference.child("All").child(coursename.getText().toString()).setValue(course);
                                         mStatusDatabaseReference.child(year.getText().toString()).child(coursename.getText().toString()).setValue("False");

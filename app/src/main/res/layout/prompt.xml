@@ -28,17 +28,31 @@
         android:hint="Faculty Name"
         android:inputType="textPersonName" />
     <EditText
-        android:id="@+id/editText3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText2"
+        android:id="@+id/editText3"
+        android:hint="Mobile Number"
+        android:inputType="text"
+        android:layout_below="@id/editText2"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText4"
+        android:hint="Venue"
+        android:inputType="text"
+        android:layout_below="@id/editText3"/>
+    <EditText
+        android:id="@+id/editText5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText4"
         android:hint="Year"
         android:inputType="number" />
     <EditText
-        android:id="@+id/editText4"
+        android:id="@+id/editText6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText3"
+        android:layout_below="@+id/editText5"
         android:hint="Email Address(seperated by commas)"
         android:inputType="text" />
 

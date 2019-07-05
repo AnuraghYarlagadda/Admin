@@ -34,17 +34,15 @@ import java.util.Calendar;
 import java.util.List;
 
 public class AddAttActivity extends AppCompatActivity {
-    private static List<RollNumbers> totalRoll = new ArrayList<>();
-    Button submit, clearall;
-    CheckBox pcb, acb;
+    Button submit, clearall, checkall;
     ArrayList<CheckBox> selectedcheckBox = new ArrayList<CheckBox>();
+    private List<RollNumbers> totalRoll = new ArrayList<>();
     private List<RollNumbers> checkedRoll = new ArrayList<>();
     private List<RollNumbers> absentRoll = new ArrayList<>();
-    private List<RollNumbers> tempTotalRoll = new ArrayList<>();
     private List<RollNumbers> previousRoll = new ArrayList<>();
     private FirebaseDatabase mFirebaseDatabase;
     private ChildEventListener mChildEventListener;
-    private DatabaseReference mStatusDatabaseReference, mAttendanceDatabaseReference, mRollDatabaseReference, mCoursesDatabaseReference, mTimeDatabaseReference;
+    private DatabaseReference mStatusDatabaseReference, mAttendanceDatabaseReference,mAbsentDatabaseRefernece, mRollDatabaseReference, mCoursesDatabaseReference, mTimeDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,19 +52,19 @@ public class AddAttActivity extends AppCompatActivity {
         mCoursesDatabaseReference = mFirebaseDatabase.getReference().child("Courses");
         mRollDatabaseReference = mFirebaseDatabase.getReference().child("Roll");
         mAttendanceDatabaseReference = mFirebaseDatabase.getReference().child("Attendance");
+        mAbsentDatabaseRefernece=mFirebaseDatabase.getReference().child("AbsentAttendance");
         mTimeDatabaseReference = mFirebaseDatabase.getReference().child("Time");
         mStatusDatabaseReference = mFirebaseDatabase.getReference().child("Status");
         final LinearLayout ll = (LinearLayout) findViewById(R.id.my_layout);
         submit = (Button) findViewById(R.id.submit_button);
         clearall = (Button) findViewById(R.id.clearall);
-        pcb = (CheckBox) findViewById(R.id.presentcb);
-        acb = (CheckBox) findViewById(R.id.absentcb);
+        checkall = (Button) findViewById(R.id.checkall);
         final Intent intent = getIntent();
         final String value = intent.getStringExtra("CourseName");
         final String yearval = intent.getStringExtra("Year");
         final String status = intent.getStringExtra("status");
         TextView course = (TextView) findViewById(R.id.namecourse);
-        course.setText(value);
+        course.setText(value+"_Year_"+yearval);
         submit.setText("Submit");
         checkedRoll.clear();
         Query query1 = mAttendanceDatabaseReference.child(yearval).child(value);
@@ -111,54 +109,36 @@ public class AddAttActivity extends AppCompatActivity {
                 checkedRoll.clear();
             }
         });
-
+        checkall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox cc;
+                for (int i = 0; i < ll.getChildCount(); i++) {
+                    cc = (CheckBox) ll.getChildAt(i);
+                    cc.setChecked(true);
+                }
+                absentRoll.clear();
+            }
+        });
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if((pcb.isChecked() && !acb.isChecked())||((!pcb.isChecked() && acb.isChecked()))) {
-                    if (status.equals("True") && status != null) {
-                        if (pcb.isChecked()) {
-                            mAttendanceDatabaseReference.child(yearval).child(value).setValue(checkedRoll);
-                        }
-                        if (acb.isChecked()) {
-                            tempTotalRoll = totalRoll;
-                            for (int i = 0; i < checkedRoll.size(); i++) {
-                                for (int j = 0; j < tempTotalRoll.size(); j++) {
-                                    if (checkedRoll.get(i).rollnum.equals(tempTotalRoll.get(j).rollnum)) {
-                                        tempTotalRoll.remove(j);
-                                    }
-                                }
-                            }
-                            mAttendanceDatabaseReference.child(yearval).child(value).setValue(tempTotalRoll);
-                        }
-                        Log.d("chk", checkedRoll + "");
-                        DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
-                        String date = df.format(Calendar.getInstance().getTime());
-                        mTimeDatabaseReference.child(yearval).child(value).setValue(date);
-                        Toast.makeText(AddAttActivity.this, "Successfully Added Attendance", Toast.LENGTH_LONG).show();
-                        //SystemClock.sleep(5000);
-                    } else {
-                        Toast.makeText(AddAttActivity.this, "Permission Not Granted", Toast.LENGTH_LONG).show();
-                    }
-                    Intent intent = new Intent(AddAttActivity.this, AdminActivity.class);
-                    AddAttActivity.this.startActivity(intent);
+                if (status.equals("True") && status != null) {
+                    mAttendanceDatabaseReference.child(yearval).child(value).setValue(checkedRoll);
+                    absentRoll=totalRoll;
+                    absentRoll.removeAll(checkedRoll);
+                    mAbsentDatabaseRefernece.child(yearval).child(value).setValue(absentRoll);
+                    Log.d("chk", checkedRoll + "");
+                    DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
+                    String date = df.format(Calendar.getInstance().getTime());
+                    mTimeDatabaseReference.child(yearval).child(value).setValue(date);
+                    Toast.makeText(AddAttActivity.this, "Successfully Added Attendance", Toast.LENGTH_LONG).show();
                 } else {
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(AddAttActivity.this);
-                    builder1.setMessage("Select either Present or Absent to mark Attendance");
-                    builder1.setCancelable(true);
-                    builder1.setPositiveButton(
-                            "Okay!",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
+                    Toast.makeText(AddAttActivity.this, "Permission Not Granted", Toast.LENGTH_LONG).show();
                 }
+                Intent intent = new Intent(AddAttActivity.this, AdminActivity.class);
+                AddAttActivity.this.startActivity(intent);
             }
-
         });
     }
 
@@ -190,7 +170,9 @@ public class AddAttActivity extends AppCompatActivity {
                         selectedcheckBox.remove(cb);
                         for (int te = 0; te < checkedRoll.size(); te++) {
                             if (x.getRollnum().equals(checkedRoll.get(te).getRollnum()))
+                            {
                                 checkedRoll.remove(te);
+                            }
                         }
                     }
                 }

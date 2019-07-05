@@ -23,59 +23,119 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="25dp"
+        android:layout_margin="10dp"
         android:layout_weight="2"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/course"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
-            android:layout_gravity="bottom"
-            android:layout_margin="5dp"
-            android:gravity="center"
-            android:textAllCaps="true"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            tools:text="Course" />
+            android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/faculty"
+            <TextView
+                android:id="@+id/course"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="5dp"
+                android:layout_weight="9"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                tools:text="Course" />
+
+            <ImageButton
+                android:id="@+id/edit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@mipmap/edit_launcher_foreground" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_gravity="bottom"
-            android:layout_margin="5dp"
-            android:gravity="center"
-            android:textAllCaps="true"
-            android:textSize="20sp"
-            android:textStyle="italic"
-            tools:text="Faculty" />
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/faculty"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="15sp"
+                android:textStyle="normal"
+                tools:text="Faculty" />
+
+            <TextView
+                android:id="@+id/year"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="15sp"
+                tools:text="Year" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/mobile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="15sp"
+                tools:text="Mobile" />
+
+            <TextView
+                android:id="@+id/venue"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="15sp"
+                tools:text="Venue" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/emails"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_margin="5dp"
             android:layout_weight="1"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:scrollHorizontally="true"
-            android:layout_margin="5dp"
             android:gravity="center"
-            android:textSize="20sp"
-            android:textStyle="italic"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:textSize="15sp"
             tools:text="Emails" />
-
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="50dp"
+        android:layout_margin="25dp"
         android:layout_weight="3"
         android:orientation="vertical">
 
