@@ -233,7 +233,9 @@ public class ShowFullActivity extends AppCompatActivity {
                      x = 100;
                      y = 40;
                      i+=1;
-                        canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                     if(i<stringsList.size()) {
+                         canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                     }
                         y += 20;
 
                 }
@@ -310,7 +312,10 @@ public class ShowFullActivity extends AppCompatActivity {
                     x = 100;
                     y = 40;
                     i+=1;
-                    canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                    if(i<stringsList.size())
+                    {
+                        canvas.drawText(stringsList.get(i).toString(), x, y, paint);
+                    }
                     y += 20;
 
                 }
